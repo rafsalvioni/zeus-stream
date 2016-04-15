@@ -1,0 +1,51 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "4d360840f5af5e7ee1546aa928c42ea7",
+    "content-hash": "8827933103f43630ee64e0faf8b2642c",
+    "packages": [],
+    "packages-dev": [
+        {
+            "name": "rafsalvioni/zeus-event",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../zeus-event/",
+                "reference": "827d90bfcf1a3ad7cfedf5aa204e3c0deeeca0fb",
+                "shasum": null
+            },
+            "require": {
+                "php": ">=5.4 <6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Zeus\\Event\\": "src/"
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "provides a event oriented api",
+            "homepage": "https://github.com/rafsalvioni/zeus-event",
+            "keywords": [
+                "event",
+                "zeus"
+            ]
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "rafsalvioni/zeus-event": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.5 <6"
+    },
+    "platform-dev": []
+}

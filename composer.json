@@ -1,0 +1,31 @@
+{
+    "name": "rafsalvioni/zeus-stream",
+    "description": "provides a api to manage streams",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "stream",
+        "zeus"
+    ],
+    "homepage": "https://github.com/rafsalvioni/zeus-stream",
+    "autoload": {
+        "psr-4": {
+            "Zeus\\Stream\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.5 <6"
+    },
+    "require-dev": {
+        "rafsalvioni/zeus-event": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../"
+        }
+    ],    
+    "suggest": {
+    },
+    "extra": {
+    }
+}
