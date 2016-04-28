@@ -16,7 +16,7 @@ interface StreamInterface extends EmitterInterface
      * 
      * @param bool $bool On/off
      * @return StreamInterface
-     * @throws StreamException
+     * @throws Exception
      */
     public function setBlocking($bool);
 

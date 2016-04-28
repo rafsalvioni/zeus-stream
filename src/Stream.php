@@ -49,19 +49,79 @@ class Stream implements StreamInterface
      *
      * @var resource
      */
-    protected $stream;
+    protected $resource;
+    
+    /**
+     * Open a seekable stream, returning a resource or a instance of this class.
+     * 
+     * Add automatically the flag "b" in $mode, if it is undefined.
+     * 
+     * @param string $path
+     * @param string $mode
+     * @param bool $returnSelf Should be return a self-instance?
+     * @return self
+     * @throws Exception
+     */
+    public static function open($path, $mode, $returnSelf = true)
+    {
+        if (\substr($mode, -1) != 'b') {
+            $mode .= 'b';
+        }
+        
+        try {
+            $stream = \fopen($path, $mode);
+        }
+        catch (\ErrorException $ex) {
+            throw new Exception($ex->getMessage());
+        }
+        
+        if ($returnSelf) {
+            return static::factory($stream);
+        }
+        return $stream;
+    }
+    
+    /**
+     * Factory to create stream manager using stream meta data.
+     * 
+     * @param resource $stream Stream resource
+     * @return self
+     */
+    public static function factory($stream)
+    {
+        $self     = new static($stream);
+        $instance = null;
+        if ($self->isSeekable()) {
+            $instance = new Seek\Seekable($stream);
+        }
+        else if ($self->isReadable() && $self->isWritable()) {
+            $instance = new ReadWrite($stream);
+        }
+        else if ($self->isReadable()) {
+            $instance = new Read\Readable($stream);
+        }
+        else {
+            $instance = new Write\Writable($stream);
+        }
+        $self->resource = null;
+        return $instance;
+    }
     
     /**
      *
      * @param resource $stream Stream
      * @throws \DomainException
      */
-    public function __construct(\resource $stream)
+    public function __construct($stream)
     {
+        if (!\is_resource($stream)) {
+            throw new \InvalidArgumentException('Argument should be a resource');
+        }
+        
         $resType = \get_resource_type($stream);
 
         if (\preg_match('/stream/i', $resType)) {
-            $this->stream   = $stream;
+            $this->resource = $stream;
             $metadata       = $this->getMetaData();
             \preg_match('/^([rwax])(\+?)/', $metadata['mode'], $match);
 
@@ -105,10 +165,10 @@ class Stream implements StreamInterface
      */
     public function setBlocking($bool)
     {
-        if (\stream_set_blocking($this->stream, $bool ? 1 : 0)) {
+        if (\stream_set_blocking($this->resource, $bool ? 1 : 0)) {
             return $this;
         }
-        throw new \DomainException('Unable to set blocking mode');
+        throw new Exception('Unable to set blocking mode');
     }
 
     /**
@@ -165,7 +225,7 @@ class Stream implements StreamInterface
      */
     public function getResource()
     {
-        return $this->stream;
+        return $this->resource;
     }
 
     /**
@@ -175,7 +235,7 @@ class Stream implements StreamInterface
      */
     public function getMetaData($key = null, $default = null)
     {
-        $meta = \stream_get_meta_data($this->stream);
+        $meta = \stream_get_meta_data($this->resource);
         if ($key) {
             return isset($meta[$key]) ? $meta[$key] : $default;
         }
@@ -190,7 +250,7 @@ class Stream implements StreamInterface
      */
     final public function __toString()
     {
-        return \strval($this->stream);
+        return \strval($this->resource);
     }
 
     /**
@@ -208,8 +268,8 @@ class Stream implements StreamInterface
      */
     public function __destruct()
     {
-        if (\is_resource($this->stream)) {
-            \fclose($this->stream);
+        if (\is_resource($this->resource)) {
+            \fclose($this->resource);
         }
     }
 }

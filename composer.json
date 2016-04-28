@@ -12,16 +12,22 @@
             "Zeus\\Stream\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "ZeusTest\\Stream\\": "test/"
+        }
+    },
     "require": {
         "php": ">=5.5 <6"
     },
     "require-dev": {
-        "rafsalvioni/zeus-event": "dev-master"
+        "rafsalvioni/zeus-event": "dev-master",
+        "phpunit/phpunit": "5.3.0"
     },
     "repositories": [
         {
             "type": "path",
-            "url": "../"
+            "url": "../zeus-*"
         }
     ],    
     "suggest": {
