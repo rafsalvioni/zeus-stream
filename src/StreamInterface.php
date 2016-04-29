@@ -26,6 +26,14 @@ interface StreamInterface extends EmitterInterface
      * @return StreamInterface
      */
     public function toggleBlocking();
+    
+    /**
+     * Sets / returns a default string used by end of line.
+     * 
+     * @param string $eol End of line string
+     * @return string
+     */
+    public function eol($eol = null);
 
     /**
      * Shows if stream is in blocking mode.

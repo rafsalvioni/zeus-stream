@@ -20,6 +20,10 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $this->stream = new \Zeus\Stream\Temp();
         $this->reader = Stream::open(__FILE__, 'r');
         $this->writer = new \Zeus\Stream\Output();
+        
+        $this->stream->eol("\n");
+        $this->reader->eol("\n");
+        $this->writer->eol("\n");
     }
     
     /**
@@ -73,7 +77,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
      */
     public function readLine()
     {
-        $this->assertEquals(\trim($this->reader->readLine("\n")), "<?php");
+        $this->assertEquals($this->reader->readLine(), "<?php\n");
     }
     
     /**
@@ -82,10 +86,11 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function iterator()
     {
         $string = '';
+        $this->reader->cursorBegin();
         foreach ($this->reader as $line) {
             $string .= $line;
         }
-        $this->assertTrue(true);
+        $this->assertTrue(\trim($string) == \trim(\file_get_contents(__FILE__)));
     }
     
     /**
@@ -130,7 +135,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function writeLine()
     {
         $line = __CLASS__;
-        $this->stream->writeLine($line, "\n");
+        $this->stream->writeLine($line);
         $this->stream->cursorBegin();
         $len  = \strlen(__CLASS__) + 1;
         $this->assertEquals($line . "\n", $this->stream->read($len));

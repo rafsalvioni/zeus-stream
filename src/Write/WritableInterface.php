@@ -26,7 +26,8 @@ interface WritableInterface extends StreamInterface
     /**
      * Write a line data.
      *
-     * If the line data doesn't have a "end of line" string, it is appended.
+     * If the line data doesn't have a "end of line" string, it is appended. If
+     * $eof isn't given, the default object's eol will be used.
      *
      * Returns the quantity of bytes written.
      *
@@ -34,7 +35,7 @@ interface WritableInterface extends StreamInterface
      * @param string $eol End of line string
      * @return int
      */
-    public function writeLine($line, $eol = \PHP_EOL);
+    public function writeLine($line, $eol = null);
 
     /**
      * Copy data between streams.

@@ -12,7 +12,6 @@ use Zeus\Stream\Read\ReadableInterface;
  * @author Rafael M. Salvioni
  */
 trait WriteTrait
-//class WriteTrait extends \Zeus\Stream\Stream implements WritableInterface
 {
     /**
      * 
@@ -42,9 +41,10 @@ trait WriteTrait
      * @param string $eol
      * @return int
      */
-    public function writeLine($line, $eol = \PHP_EOL)
+    public function writeLine($line, $eol = null)
     {
-        $n = \strlen($eol);
+        $eol = \is_null($eol) ? $this->eol : $eol;
+        $n   = \strlen($eol);
         if (\substr($line, -$n) != $eol) {
             $line .= $eol;
         }

@@ -23,13 +23,14 @@ interface ReadableInterface extends StreamInterface, \IteratorAggregate
     /**
      * Returns a line of data.
      * 
-     * $eol will be appended in returned value.
+     * $eol will be appended in returned value. If $eol isn't given,
+     * the default eol of object will be used.
      *
-     * @param string $eol "end of line" satring
+     * @param string $eol "end of line" string
      * @return string
      * @throws Exception
      */
-    public function readLine($eol = \PHP_EOL);
+    public function readLine($eol = null);
     
     /**
      * Retruns all remaining data of stream.

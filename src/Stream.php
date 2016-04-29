@@ -50,7 +50,14 @@ class Stream implements StreamInterface
      * @var resource
      */
     protected $resource;
-    
+    /**
+     * End of line default
+     * 
+     * @var string
+     */
+    protected $eol = \PHP_EOL;
+
+
     /**
      * Open a seekable stream, returning a resource or a instance of this class.
      * 
@@ -181,6 +188,19 @@ class Stream implements StreamInterface
         $bool = !$bool;
         $this->setBlocking($bool);
         return $this;
+    }
+    
+    /**
+     * 
+     * @param string $eol
+     * @return string
+     */
+    public function eol($eol = null)
+    {
+        if (!\is_null($eol)) {
+            $this->eol = (string)$eol;
+        }
+        return $this->eol;
     }
 
     /**

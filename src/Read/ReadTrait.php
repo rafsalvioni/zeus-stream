@@ -10,7 +10,6 @@ namespace Zeus\Stream\Read;
  * @author Rafael M. Salvioni
  */
 trait ReadTrait
-//class ReadTrait extends \Zeus\Stream\Stream implements ReadableInterface
 {
     /**
      *
@@ -36,9 +35,10 @@ trait ReadTrait
      * @return string
      * @throws Exception
      */
-    public function readLine($eol = \PHP_EOL)
+    public function readLine($eol = null)
     {
         try {
+            $eol  = !\is_null($eol) ? (string)$eol : $this->eol;
             $line = \stream_get_line($this->resource, 0, $eol);
             $this->emit('read', $line);
             return $line . $eol;
