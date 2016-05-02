@@ -20,7 +20,7 @@ class Input extends Readable
      */
     public function __construct()
     {
-        $cmd    = 'php://' . (isset($_SERVER['REMOTE_ADDR']) ? 'input' : 'stdin');
+        $cmd    = 'php://' . (\PHP_ON_WEB ? 'input' : 'stdin');
         $stream = Stream::open($cmd, 'r', false);
         parent::__construct($stream);
     }

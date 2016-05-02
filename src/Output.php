@@ -20,7 +20,7 @@ class Output extends Writable
      */
     public function __construct($data = null)
     {
-        $cmd    = 'php://' . (isset($_SERVER['REMOTE_ADDR']) ? 'output' : 'stdout');
+        $cmd    = 'php://' . (\PHP_ON_WEB ? 'output' : 'stdout');
         $stream = Stream::open($cmd, 'w', false);
         parent::__construct($stream);
         $this->write($data);

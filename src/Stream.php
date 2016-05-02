@@ -257,7 +257,7 @@ class Stream implements StreamInterface
     {
         $meta = \stream_get_meta_data($this->resource);
         if ($key) {
-            return isset($meta[$key]) ? $meta[$key] : $default;
+            return \array_get($meta, $key, $default);
         }
         else {
             return $meta;
