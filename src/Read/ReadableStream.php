@@ -2,7 +2,7 @@
 
 namespace Zeus\Stream\Read;
 
-use Zeus\Stream\Stream;
+use Zeus\Stream\StreamWrapper;
 
 /**
  * Manages a read only stream.
@@ -10,9 +10,9 @@ use Zeus\Stream\Stream;
  * @author Rafael M. Salvioni
  * @package Zeus\Stream
  */
-class Readable extends Stream implements ReadableInterface
+class ReadableStream extends StreamWrapper implements ReadableStreamInterface
 {
-    use ReadTrait;
+    use ReadableStreamTrait;
     
     /**
      * 

@@ -3,13 +3,14 @@
 namespace Zeus\Stream;
 
 use Zeus\Event\EmitterTrait;
+use Zeus\Core\BitMask;
 
 /**
  * Implements a generic stream manager.
  *
  * @author Rafael M. Salvioni
  */
-class Stream implements StreamInterface
+class StreamWrapper implements StreamInterface
 {
     use EmitterTrait;
     
@@ -39,9 +40,9 @@ class Stream implements StreamInterface
     const PERSISTENT = 8;
 
     /**
-     * Stream flags. Is a bitmask
+     * Stream flags
      *
-     * @var int
+     * @var BitMask
      */
     private   $flags;
     /**
@@ -99,16 +100,16 @@ class Stream implements StreamInterface
         $self     = new static($stream);
         $instance = null;
         if ($self->isSeekable()) {
-            $instance = new Seek\Seekable($stream);
+            $instance = new Seek\SeekableStream($stream);
         }
         else if ($self->isReadable() && $self->isWritable()) {
-            $instance = new ReadWrite($stream);
+            $instance = new ReadWriteStream($stream);
         }
         else if ($self->isReadable()) {
-            $instance = new Read\Readable($stream);
+            $instance = new Read\ReadableStream($stream);
         }
         else {
-            $instance = new Write\Writable($stream);
+            $instance = new Write\WritableStream($stream);
         }
         $self->resource = null;
         return $instance;
@@ -132,21 +133,23 @@ class Stream implements StreamInterface
             $metadata       = $this->getMetaData();
             \preg_match('/^([rwax])(\+?)/', $metadata['mode'], $match);
 
+            $this->flags = new BitMask();
+            
             if ($match[2] == '+') {
-                $this->flags = self::READABLE | self::WRITABLE;
+                $this->flags->add(self::READABLE)->add(self::WRITABLE);
             }
             else if ($match[1] == 'r') {
-                $this->flags = self::READABLE;
+                $this->flags->add(self::READABLE);
             }
             else {
-                $this->flags = self::WRITABLE;
+                $this->flags->add(self::WRITABLE);
             }
 
             if (\preg_match('/persistent/i', $resType)) {
-                $this->flags |= self::PERSISTENT;
+                $this->flags->add(self::PERSISTENT);
             }
             if ($this->getMetaData('seekable', false)) {
-                $this->flags |= self::SEEKABLE;
+                $this->flags->add(self::SEEKABLE);
             }
         }
         else {
@@ -209,7 +212,7 @@ class Stream implements StreamInterface
      */
     public function isWritable()
     {
-        return ($this->flags & self::WRITABLE) > 0;
+        return $this->flags->has(self::WRITABLE);
     }
 
     /**
@@ -218,7 +221,7 @@ class Stream implements StreamInterface
      */
     public function isReadable()
     {
-        return ($this->flags & self::READABLE) > 0;
+        return $this->flags->has(self::READABLE);
     }
 
     /**
@@ -227,7 +230,7 @@ class Stream implements StreamInterface
      */
     public function isSeekable()
     {
-        return ($this->flags & self::SEEKABLE) > 0;
+        return $this->flags->has(self::SEEKABLE);
     }
     
     /**
@@ -236,7 +239,7 @@ class Stream implements StreamInterface
      */
     public function isPersistent()
     {
-        return ($this->flags & self::PERSISTENT) > 0;
+        return $this->flags->has(self::PERSISTENT);
     }
     
     /**

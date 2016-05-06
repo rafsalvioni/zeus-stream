@@ -2,7 +2,7 @@
 
 namespace ZeusTest\Stream;
 
-use Zeus\Stream\Stream;
+use Zeus\Stream\StreamWrapper;
 
 /**
  * Test to main features of Stream package.
@@ -17,9 +17,9 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     
     public function setUp()
     {
-        $this->stream = new \Zeus\Stream\Temp();
-        $this->reader = Stream::open(__FILE__, 'r');
-        $this->writer = new \Zeus\Stream\Output();
+        $this->stream = new \Zeus\Stream\TempFileStream();
+        $this->reader = StreamWrapper::open(__FILE__, 'r');
+        $this->writer = new \Zeus\Stream\OutputStream();
         
         $this->stream->eol("\n");
         $this->reader->eol("\n");
@@ -32,8 +32,8 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function factoryTest()
     {
         $this->assertTrue(
-            (Stream::factory(\STDIN) instanceof \Zeus\Stream\Read\Readable) &&
-            (Stream::factory(\fopen('php://output', 'w')) instanceof \Zeus\Stream\Write\Writable)
+            (StreamWrapper::factory(\STDIN) instanceof \Zeus\Stream\Read\ReadableStream) &&
+            (StreamWrapper::factory(\fopen('php://output', 'w')) instanceof \Zeus\Stream\Write\WritableStream)
         );
     }
 
@@ -99,7 +99,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
      */
     public function readableException()
     {
-        new \Zeus\Stream\Read\Readable(\STDOUT);
+        new \Zeus\Stream\Read\ReadableStream(\STDOUT);
     }
     
     /**

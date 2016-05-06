@@ -2,18 +2,18 @@
 
 namespace Zeus\Stream\Seek;
 
-use Zeus\Stream\Stream;
-use Zeus\Stream\Read\ReadTrait;
-use Zeus\Stream\Write\WriteTrait;
+use Zeus\Stream\StreamWrapper;
+use Zeus\Stream\Read\ReadableStreamTrait;
+use Zeus\Stream\Write\WritableStreamTrait;
 
 /**
  * Implements a seekable stream.
  * 
  * @author Rafael M. Salvioni
  */
-class Seekable extends Stream implements SeekableInterface
+class SeekableStream extends StreamWrapper implements SeekableStreamInterface
 {
-    use ReadTrait, WriteTrait;
+    use ReadableStreamTrait, WritableStreamTrait;
     
     /**
      * Defines the stream's cursor position.
@@ -122,10 +122,10 @@ class Seekable extends Stream implements SeekableInterface
     
     /**
      * 
-     * @return Iterator
+     * @return SeekableStreamIterator
      */
     public function getIterator()
     {
-        return new Iterator($this);
+        return new SeekableStreamIterator($this);
     }
 }

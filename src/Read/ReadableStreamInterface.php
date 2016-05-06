@@ -9,7 +9,7 @@ use Zeus\Stream\StreamInterface;
  * 
  * @author Rafael M. Salvioni
  */
-interface ReadableInterface extends StreamInterface, \IteratorAggregate
+interface ReadableStreamInterface extends StreamInterface, \IteratorAggregate
 {
     /**
      * Returns a quantity of bytes from stream.

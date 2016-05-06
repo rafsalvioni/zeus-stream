@@ -2,7 +2,7 @@
 
 namespace Zeus\Stream\Write;
 
-use Zeus\Stream\Read\ReadableInterface;
+use Zeus\Stream\Read\ReadableStreamInterface;
 
 /**
  * Trait to implement default methods of WritableInterface.
@@ -11,7 +11,7 @@ use Zeus\Stream\Read\ReadableInterface;
  * 
  * @author Rafael M. Salvioni
  */
-trait WriteTrait
+trait WritableStreamTrait
 {
     /**
      * 
@@ -53,11 +53,11 @@ trait WriteTrait
 
     /**
      * 
-     * @param ReadableInterface $stream
+     * @param ReadableStreamInterface $stream
      * @param int $maxLen
      * @return int
      */
-    public function writeFrom(ReadableInterface $stream, $maxLen = -1)
+    public function writeFrom(ReadableStreamInterface $stream, $maxLen = -1)
     {
         try {
             /*$bytes = \stream_copy_to_stream(
@@ -77,10 +77,10 @@ trait WriteTrait
     /**
      * Copy all remainder contents of a stream to this stream.
      * 
-     * @param ReadableInterface $from From stream
+     * @param ReadableStreamInterface $from From stream
      * @return int
      */
-    private function copyAll(ReadableInterface $from)
+    private function copyAll(ReadableStreamInterface $from)
     {
         $bytes = 0;
         while (!$from->eof()) {
@@ -93,11 +93,11 @@ trait WriteTrait
     /**
      * Copy $maxLen bytes from a stream.
      * 
-     * @param ReadableInterface $from From stream 
+     * @param ReadableStreamInterface $from From stream 
      * @param type $maxLen Max lenght of bytes
      * @return int
      */
-    private function copyWithLimit(ReadableInterface $from, $maxLen)
+    private function copyWithLimit(ReadableStreamInterface $from, $maxLen)
     {
         $bytes = 0;
         while (!$from->eof() && $maxLen > 0) {

@@ -2,7 +2,7 @@
 
 namespace Zeus\Stream\Write;
 
-use Zeus\Stream\Stream;
+use Zeus\Stream\StreamWrapper;
 
 /**
  * Manages a write only stream.
@@ -10,9 +10,9 @@ use Zeus\Stream\Stream;
  * @author Rafael M. Salvioni
  * @package Zeus\Stream
  */
-class Writable extends Stream implements WritableInterface
+class WritableStream extends StreamWrapper implements WritableStreamInterface
 {
-    use WriteTrait;
+    use WritableStreamTrait;
     
     /**
      * 

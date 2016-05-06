@@ -9,7 +9,7 @@ namespace Zeus\Stream\Read;
  * 
  * @author Rafael M. Salvioni
  */
-trait ReadTrait
+trait ReadableStreamTrait
 {
     /**
      *
@@ -76,10 +76,10 @@ trait ReadTrait
 
     /**
      * 
-     * @return Iterator
+     * @return ReadableStreamIterator
      */
     public function getIterator()
     {
-        return new Iterator($this);
+        return new ReadableStreamIterator($this);
     }
 }

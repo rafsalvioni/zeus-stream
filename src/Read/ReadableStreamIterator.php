@@ -7,12 +7,12 @@ namespace Zeus\Stream\Read;
  *
  * @author Rafael M. Salvioni
  */
-class Iterator implements \Iterator
+class ReadableStreamIterator implements \Iterator
 {
     /**
      * Stream reader
      * 
-     * @var ReadableInterface 
+     * @var ReadableStreamInterface 
      */
     protected $streamReader;
     /**
@@ -24,9 +24,9 @@ class Iterator implements \Iterator
     
     /**
      * 
-     * @param ReadableInterface $stream
+     * @param ReadableStreamInterface $stream
      */
-    public function __construct(ReadableInterface $stream)
+    public function __construct(ReadableStreamInterface $stream)
     {
         $this->streamReader = $stream;
         $this->currentLine  = -1;

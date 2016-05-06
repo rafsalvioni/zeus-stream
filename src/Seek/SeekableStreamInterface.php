@@ -2,15 +2,15 @@
 
 namespace Zeus\Stream\Seek;
 
-use Zeus\Stream\Read\ReadableInterface;
-use Zeus\Stream\Write\WritableInterface;
+use Zeus\Stream\Read\ReadableStreamInterface;
+use Zeus\Stream\Write\WritableStreamInterface;
 
 /**
  * Identifies a seekable stream.
  * 
  * @author Rafael M. Salvioni
  */
-interface SeekableInterface extends ReadableInterface, WritableInterface
+interface SeekableStreamInterface extends ReadableStreamInterface, WritableStreamInterface
 {
     /**
      * Moves cursor to the begin of stream.

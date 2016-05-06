@@ -3,14 +3,14 @@
 namespace Zeus\Stream\Write;
 
 use Zeus\Stream\StreamInterface;
-use Zeus\Stream\Read\ReadableInterface;
+use Zeus\Stream\Read\ReadableStreamInterface;
 
 /**
  * Identifies a writable stream.
  * 
  * @author Rafael M. Salvioni
  */
-interface WritableInterface extends StreamInterface
+interface WritableStreamInterface extends StreamInterface
 {
     /**
      * Write data on stream.
@@ -42,9 +42,9 @@ interface WritableInterface extends StreamInterface
      *
      * Returns the quantity of bytes written.
      *
-     * @param ReadableInterface $stream Stream
+     * @param ReadableStreamInterface $stream Stream
      * @param int $maxLen Max bytes to be written
      * @return int
      */
-    public function writeFrom(ReadableInterface $stream, $maxLen = -1);
+    public function writeFrom(ReadableStreamInterface $stream, $maxLen = -1);
 }
