@@ -37,6 +37,20 @@ interface SeekableStreamInterface extends ReadableStreamInterface, WritableStrea
     public function cursorTo($offset, $add = false);
 
     /**
+     * Moves the cursor to the next position.
+     * 
+     * @return self
+     */
+    public function cursorNext();
+
+    /**
+     * Moves cursor to the previous position.
+     * 
+     * @return self
+     */
+    public function cursorPrevious();
+    
+    /**
      * Returns the current position.
      *
      * @return int
