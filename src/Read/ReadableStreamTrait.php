@@ -82,4 +82,19 @@ trait ReadableStreamTrait
     {
         return new ReadableStreamIterator($this);
     }
+    
+    /**
+     * Alias to readAll().
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        try {
+            return $this->readAll();
+        }
+        catch (\Exception $e) {
+            return '';
+        }
+    }
 }

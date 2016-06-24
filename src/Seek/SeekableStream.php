@@ -110,4 +110,25 @@ class SeekableStream extends StreamWrapper implements SeekableStreamInterface
     {
         return new SeekableStreamIterator($this);
     }
+    
+    /**
+     * Returns all stream contents.
+     * 
+     * The cursor's position isn't affected.
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        try {
+            $pos    = $this->tell();
+            $this->seekBegin();
+            $string = $this->readAll();
+            $this->seek($pos);
+            return $string;
+        }
+        catch (\Exception $ex) {
+            return '';
+        }
+    }
 }
