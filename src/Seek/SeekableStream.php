@@ -37,7 +37,7 @@ class SeekableStream extends StreamWrapper implements SeekableStreamInterface
     {
         parent::__construct($stream);
         if (!$this->isSeekable()) {
-            throw new \DomainException('The stream isn\'t a local one');
+            throw new \DomainException('The stream isn\'t seekable');
         }
     }
     
@@ -45,7 +45,7 @@ class SeekableStream extends StreamWrapper implements SeekableStreamInterface
      *
      * @return self
      */
-    public function cursorBegin()
+    public function seekBegin()
     {
         return $this->setCursor(0);
     }
@@ -54,34 +54,16 @@ class SeekableStream extends StreamWrapper implements SeekableStreamInterface
      *
      * @return self
      */
-    public function cursorEnd()
+    public function seekEnd()
     {
         return $this->setCursor(0, \SEEK_END);
     }
     
     /**
-     * 
-     * @return self
-     */
-    public function cursorNext()
-    {
-        return $this->cursorTo(1, true);
-    }
-
-    /**
-     * 
-     * @return self
-     */
-    public function cursorPrevious()
-    {
-        return $this->cursorTo(-1, true);
-    }
-
-    /**
      *
      * @return self
      */
-    public function cursorTo($offset, $add = false)
+    public function seek($offset, $add = false)
     {
         $whence = $add ? \SEEK_CUR : \SEEK_SET;
         return $this->setCursor($offset, $whence);
@@ -91,7 +73,7 @@ class SeekableStream extends StreamWrapper implements SeekableStreamInterface
      *
      * @return int
      */
-    public function cursorPos()
+    public function tell()
     {
         return \ftell($this->resource);
     }
@@ -111,12 +93,12 @@ class SeekableStream extends StreamWrapper implements SeekableStreamInterface
      *
      * @return int
      */
-    public function getLength()
+    public function getSize()
     {
-        $offset = $this->cursorPos();
-        $this->cursorEnd();
-        $length = $this->cursorPos();
-        $this->cursorTo($offset);
+        $offset = $this->tell();
+        $this->seekEnd();
+        $length = $this->tell();
+        $this->seek($offset);
         return $length;
     }
     

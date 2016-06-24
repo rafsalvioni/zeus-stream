@@ -10,21 +10,23 @@ use Zeus\Stream\Write\WritableStreamInterface;
  * 
  * @author Rafael M. Salvioni
  */
-interface SeekableStreamInterface extends ReadableStreamInterface, WritableStreamInterface
+interface SeekableStreamInterface extends
+    ReadableStreamInterface,
+    WritableStreamInterface
 {
     /**
      * Moves cursor to the begin of stream.
      *
      * @return self
      */
-    public function cursorBegin();
+    public function seekBegin();
 
     /**
      * Moves cursor to the end of stream.
      *
      * @return self
      */
-    public function cursorEnd();
+    public function seekEnd();
     
     /**
      * Moves cursor to a defined position.
@@ -34,28 +36,14 @@ interface SeekableStreamInterface extends ReadableStreamInterface, WritableStrea
      *
      * @return self
      */
-    public function cursorTo($offset, $add = false);
+    public function seek($offset, $add = false);
 
-    /**
-     * Moves the cursor to the next position.
-     * 
-     * @return self
-     */
-    public function cursorNext();
-
-    /**
-     * Moves cursor to the previous position.
-     * 
-     * @return self
-     */
-    public function cursorPrevious();
-    
     /**
      * Returns the current position.
      *
      * @return int
      */
-    public function cursorPos();
+    public function tell();
     
     /**
      * Truncate the stream to $size bytes.
@@ -67,10 +55,10 @@ interface SeekableStreamInterface extends ReadableStreamInterface, WritableStrea
     public function truncate($size = 0);
 
     /**
-     * Return the stream length, in bytes.
+     * Return the stream size, in bytes.
      *
      * @return int
      */
-    public function getLength();
+    public function getSize();
 }
 

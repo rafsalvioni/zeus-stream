@@ -26,7 +26,7 @@ class SeekableStreamIterator extends ReadIterator
      */
     public function rewind()
     {
-        $this->streamReader->cursorBegin();
+        $this->streamReader->seekBegin();
         return parent::rewind();
     }
 }

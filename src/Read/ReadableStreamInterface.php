@@ -33,7 +33,7 @@ interface ReadableStreamInterface extends StreamInterface, \IteratorAggregate
     public function readLine($eol = null);
     
     /**
-     * Retruns all remaining data of stream.
+     * Returns all remaining data of stream.
      * 
      * @return string
      * @throws Exception

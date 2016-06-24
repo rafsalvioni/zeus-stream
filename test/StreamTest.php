@@ -86,7 +86,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function iterator()
     {
         $string = '';
-        $this->reader->cursorBegin();
+        $this->reader->seekBegin();
         foreach ($this->reader as $line) {
             $string .= $line;
         }
@@ -136,7 +136,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     {
         $line = __CLASS__;
         $this->stream->writeLine($line);
-        $this->stream->cursorBegin();
+        $this->stream->seekBegin();
         $len  = \strlen(__CLASS__) + 1;
         $this->assertEquals($line . "\n", $this->stream->read($len));
     }
@@ -149,6 +149,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $str = __CLASS__;
         $len = \strlen($str);
         $this->stream->write($str);
-        $this->assertEquals($len, $this->stream->getLength());
+        $this->assertEquals($len, $this->stream->getSize());
     }
 }
