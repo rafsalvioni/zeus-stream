@@ -11,6 +11,10 @@ use Psr\Http\Message\StreamInterface as PsrStreamInterface;
  * Implements a generic stream manager.
  *
  * @author Rafael M. Salvioni
+ * @event read When stream was read
+ * @event write When stream was write
+ * @event seek When stream was seek
+ * @event block When stream was block/unblock
  */
 class Stream implements StreamInterface
 {
@@ -62,7 +66,7 @@ class Stream implements StreamInterface
 
 
     /**
-     * Open a seekable stream, returning a resource or a instance of this class.
+     * Open a stream, returning a resource or a instance of this class.
      * 
      * Add automatically the flag "b" in $mode, if it is undefined.
      * 
@@ -70,7 +74,7 @@ class Stream implements StreamInterface
      * @param string $mode
      * @param bool $returnSelf Should be return a self-instance?
      * @return self
-     * @throws Exception
+     * @throws \RuntimeException
      */
     public static function open($path, $mode, $returnSelf = true)
     {
@@ -96,7 +100,7 @@ class Stream implements StreamInterface
     /**
      *
      * @param resource $stream Stream
-     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
     public function __construct($stream)
     {
@@ -131,15 +135,26 @@ class Stream implements StreamInterface
             }
         }
         else {
-            throw new \RuntimeException("Invalid stream resource");
+            throw new \InvalidArgumentException('Invalid stream resource');
         }
     }
 
+    /**
+     * 
+     * @throws \LogicException
+     */
     public function __sleep()
     {
         throw new \LogicException('A stream can\'t be serialized!');
     }
 
+    /**
+     * If stream isn'\t readable, return a empty string. Else, if it is
+     * seekable, returns all contents of stream, independetely of its position.
+     * Else, returns only the remainder data, if have.
+     * 
+     * @return string
+     */
     public function __toString()
     {
         try {
@@ -165,6 +180,10 @@ class Stream implements StreamInterface
         return $contents;
     }
 
+    /**
+     * 
+     * @return self
+     */
     public function close()
     {
         if (\is_resource($this->stream)) {
@@ -174,6 +193,10 @@ class Stream implements StreamInterface
         return $this;
     }
 
+    /**
+     * 
+     * @return resource|null
+     */
     public function detach()
     {
         $stream = $this->stream;
@@ -182,6 +205,10 @@ class Stream implements StreamInterface
         return $stream;
     }
 
+    /**
+     * 
+     * @return bool
+     */
     public function eof()
     {
         return \is_resource($this->stream) ?
@@ -189,6 +216,11 @@ class Stream implements StreamInterface
                true;
     }
 
+    /**
+     * 
+     * @param string $eol
+     * @return string
+     */
     public function eol($eol = null)
     {
         if (!\is_null($eol)) {
@@ -197,6 +229,12 @@ class Stream implements StreamInterface
         return $this->eol;
     }
 
+    /**
+     * 
+     * @return string
+     * @throws \ErrorException
+     * @throws \RuntimeException
+     */
     public function getContents()
     {
         $this->checkStream();
@@ -207,6 +245,12 @@ class Stream implements StreamInterface
         return $contents;
     }
 
+    /**
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
     public function getMetaData($key = null, $default = null)
     {
         if (\is_resource($this->stream)) {
@@ -221,6 +265,10 @@ class Stream implements StreamInterface
         return $default;
     }
 
+    /**
+     * 
+     * @return int
+     */
     public function getSize()
     {
         $pos  = $this->tell();
@@ -230,31 +278,56 @@ class Stream implements StreamInterface
         return $size;
     }
 
+    /**
+     * 
+     * @return bool
+     */
     public function isBlocked()
     {
         return $this->getMetaData('blocked', false);
     }
 
+    /**
+     * 
+     * @return bool
+     */
     public function isPersistent()
     {
         return $this->flags->has(self::PERSISTENT);
     }
 
+    /**
+     * 
+     * @return bool
+     */
     public function isReadable()
     {
         return $this->flags->has(self::READABLE);
     }
 
+    /**
+     * 
+     * @return bool
+     */
     public function isSeekable()
     {
         return $this->flags->has(self::SEEKABLE);
     }
 
+    /**
+     * 
+     * @return bool
+     */
     public function isWritable()
     {
         return $this->flags->has(self::WRITABLE);
     }
 
+    /**
+     * 
+     * @param int $length
+     * @return string
+     */
     public function read($length = 1024)
     {
         $this->checkStream();
@@ -263,6 +336,11 @@ class Stream implements StreamInterface
         return $string;
     }
 
+    /**
+     * 
+     * @param string $eol
+     * @return string
+     */
     public function readLine($eol = null)
     {
         $this->checkStream();
@@ -275,41 +353,76 @@ class Stream implements StreamInterface
         return $line;
     }
 
+    /**
+     * 
+     * @return self
+     */
     public function rewind()
     {
         return $this->seek(0);
     }
 
+    /**
+     * 
+     * @param int $offset
+     * @param int $whence
+     * @return self
+     * @throws \RuntimeException
+     */
     public function seek($offset, $whence = SEEK_SET)
     {
         $this->checkStream();
         if (\fseek($this->stream, $offset, $whence) == -1) {
             throw new \RuntimeException('Stream isn\'t seekable!');
         }
+        $this->emit('seek', $offset, $whence);
         return $this;
     }
 
+    /**
+     * 
+     * @param bool $bool
+     * @return self
+     * @throws \ErrorException
+     * @throws \RuntimeException
+     */
     public function setBlocking($bool)
     {
         $this->checkStream();
         ErrorHandler::start();
         \stream_set_blocking($this->stream, (bool)$bool);
+        $this->emit('block', (bool)$bool);
         ErrorHandler::stop();
         return $this;
     }
 
+    /**
+     * 
+     * @return int
+     */
     public function tell()
     {
         $this->checkStream();
         return \ftell($this->stream);
     }
 
+    /**
+     * 
+     * @return self
+     */
     public function toggleBlocking()
     {
         $block = !$this->isBlocked();
         return $this->setBlocking($block);
     }
 
+    /**
+     * 
+     * @param int $size
+     * @return self
+     * @throws \ErrorException
+     * @throws \RuntimeException
+     */
     public function truncate($size = 0)
     {
         $this->checkStream();
@@ -319,6 +432,11 @@ class Stream implements StreamInterface
         return $this;
     }
 
+    /**
+     * 
+     * @param string $string
+     * @return int
+     */
     public function write($string)
     {
         $this->checkStream();
@@ -327,6 +445,12 @@ class Stream implements StreamInterface
         return $bytes;
     }
 
+    /**
+     * 
+     * @param PsrStreamInterface $stream
+     * @param int $maxLen
+     * @return int
+     */
     public function writeFrom(PsrStreamInterface $stream, $maxLen = -1)
     {
         $bytes = 0;
@@ -347,6 +471,12 @@ class Stream implements StreamInterface
         return $bytes;
     }
 
+    /**
+     * 
+     * @param string $line
+     * @param string $eol
+     * @return int
+     */
     public function writeLine($line, $eol = null)
     {
         $eol = \coalesce($eol, $this->eol);
@@ -357,16 +487,25 @@ class Stream implements StreamInterface
         return $this->write($line);
     }
 
+    /**
+     * 
+     * @return StreamIterator
+     */
+    public function getIterator()
+    {
+        $this->checkStream();
+        return new StreamIterator($this);
+    }
+
+    /**
+     * Checks if the stream resource is valid and, if not, throws a exception.
+     * 
+     * @throws \RuntimeException
+     */
     private function checkStream()
     {
         if (!\is_resource($this->stream)) {
             throw new \RuntimeException('Stream is closed or detached!');
         }
-    }
-
-    public function getIterator()
-    {
-        $this->checkStream();
-        return new StreamIterator($this);
     }
 }
