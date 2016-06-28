@@ -3,7 +3,7 @@
 namespace Zeus\Stream;
 
 /**
- * Implements a stream that using temperary files.
+ * Implements a stream that using temporary files.
  * 
  * @author Rafael M. Salvioni
  */

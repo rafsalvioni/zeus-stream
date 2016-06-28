@@ -109,12 +109,6 @@ interface StreamInterface extends
     public function getMetaData($key = null, $default = null);
 
     /**
-     *
-     * @return string
-     */
-    public function __toString();
-
-    /**
      * Disable a stream serialization.
      *
      * @throws \LogicException
