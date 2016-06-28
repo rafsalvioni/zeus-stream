@@ -1,20 +1,20 @@
 <?php
 
-namespace Zeus\Stream\Read;
+namespace Zeus\Stream;
 
 /**
  * Iterator for readable streams.
  *
  * @author Rafael M. Salvioni
  */
-class ReadableStreamIterator implements \Iterator
+class StreamIterator implements \Iterator
 {
     /**
-     * Stream reader
+     * Stream
      * 
-     * @var ReadableStreamInterface 
+     * @var StreamInterface 
      */
-    protected $streamReader;
+    protected $stream;
     /**
      * Current line key
      * 
@@ -24,12 +24,12 @@ class ReadableStreamIterator implements \Iterator
     
     /**
      * 
-     * @param ReadableStreamInterface $stream
+     * @param StreamInterface $stream
      */
-    public function __construct(ReadableStreamInterface $stream)
+    public function __construct(StreamInterface $stream)
     {
-        $this->streamReader = $stream;
-        $this->currentLine  = -1;
+        $this->stream      = $stream;
+        $this->currentLine = -1;
     }
 
     /**
@@ -38,7 +38,7 @@ class ReadableStreamIterator implements \Iterator
      */
     public function current()
     {
-        $data = $this->streamReader->readLine();
+        $data = $this->stream->readLine();
         $this->currentLine++;
         return $data;
     }
@@ -67,6 +67,9 @@ class ReadableStreamIterator implements \Iterator
      */
     public function rewind()
     {
+        if ($this->stream->isSeekable()) {
+            $this->stream->rewind();
+        }
         $this->currentLine = -1;
         return $this;
     }
@@ -77,6 +80,6 @@ class ReadableStreamIterator implements \Iterator
      */
     public function valid()
     {
-        return !$this->streamReader->eof();
+        return !$this->stream->eof();
     }
 }

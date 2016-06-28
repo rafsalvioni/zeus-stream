@@ -2,14 +2,13 @@
 
 namespace Zeus\Stream;
 
-use Zeus\Stream\Write\WritableStream;
-
 /**
- * Implements a stream that write data on process standard output.
+ * Implements a stream that read data from PHP input.
  * 
  * @author Rafael M. Salvioni
+ * @package Zeus\Stream
  */
-class StdOutStream extends WritableStream
+class Input extends Stream
 {
     /**
      * Return the singleton instance.
@@ -30,6 +29,7 @@ class StdOutStream extends WritableStream
      */
     public function __construct()
     {
-        parent::__construct(\STDOUT);
+        $stream = Stream::open('php://input', 'r', false);
+        parent::__construct($stream);
     }
 }

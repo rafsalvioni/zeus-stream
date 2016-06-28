@@ -3,20 +3,24 @@
 namespace Zeus\Stream;
 
 use \Zeus\Event\EmitterInterface;
+use Psr\Http\Message\StreamInterface as PsrStreamInterface;
 
 /**
  * Identifies a stream manager.
  * 
  * @author Rafael M. Salvioni
  */
-interface StreamInterface extends EmitterInterface
+interface StreamInterface extends
+    EmitterInterface,
+    PsrStreamInterface,
+    \IteratorAggregate
 {
     /**
-     * Setting if a stream should be in blicking mode or not.
+     * Setting if a stream should be in blocking mode or not.
      * 
      * @param bool $bool On/off
      * @return StreamInterface
-     * @throws Exception
+     * @throws \RuntimeException
      */
     public function setBlocking($bool);
 
@@ -36,6 +40,52 @@ interface StreamInterface extends EmitterInterface
     public function eol($eol = null);
 
     /**
+     * Returns a line of data.
+     * 
+     * $eol will be appended in returned value. If $eol isn't given,
+     * the default eol of object will be used.
+     *
+     * @param string $eol "end of line" string
+     * @return string
+     * @throws \RuntimeException
+     */
+    public function readLine($eol = null);
+    
+    /**
+     * Write a line data.
+     *
+     * If the line data doesn't have a "end of line" string, it is appended. If
+     * $eof isn't given, the default object's eol will be used.
+     *
+     * Returns the quantity of bytes written.
+     *
+     * @param string $line Line
+     * @param string $eol End of line string
+     * @return int
+     */
+    public function writeLine($line, $eol = null);
+
+    /**
+     * Copy data between streams.
+     *
+     * Returns the quantity of bytes written.
+     *
+     * @param PsrStreamInterface $stream Stream
+     * @param int $maxLen Max bytes to be written
+     * @return int
+     */
+    public function writeFrom(PsrStreamInterface $stream, $maxLen = -1);
+    
+    /**
+     * Truncate the stream to $size bytes.
+     * 
+     * @see \ftruncate()
+     * @param int $size bytes
+     * @return bool
+     */
+    public function truncate($size = 0);
+    
+    /**
      * Shows if stream is in blocking mode.
      *
      * @return bool
@@ -43,39 +93,11 @@ interface StreamInterface extends EmitterInterface
     public function isBlocked();
     
     /**
-     * Shows if the stream can be written.
-     *
-     * @return bool
-     */
-    public function isWritable();
-
-    /**
-     * Shows if the stream can be readen.
-     *
-     * @return bool
-     */
-    public function isReadable();
-
-    /**
-     * Shows if the stream is seekable.
-     *
-     * @return bool
-     */
-    public function isSeekable();
-    
-    /**
      * Shows if the stream is persistent.
      *
      * @return bool
      */
     public function isPersistent();
-    
-    /**
-     * Returns the PHP stream resource.
-     * 
-     * @return resource
-     */
-    public function getResource();
     
     /**
      * Get stream metadata
@@ -98,9 +120,4 @@ interface StreamInterface extends EmitterInterface
      * @throws \LogicException
      */
     public function __sleep();
-
-    /**
-     *
-     */
-    public function __destruct();
 }

@@ -2,14 +2,12 @@
 
 namespace Zeus\Stream;
 
-use Zeus\Stream\Seek\SeekableStream;
-
 /**
  * Implements a stream that using temperary files.
  * 
  * @author Rafael M. Salvioni
  */
-class TempFileStream extends SeekableStream
+class TempFile extends Stream
 {
     /**
      *
@@ -18,7 +16,7 @@ class TempFileStream extends SeekableStream
      */
     public function __construct($data = null, $mode = 'r+')
     {
-        $stream = StreamWrapper::open('php://temp', $mode, false);
+        $stream = Stream::open('php://temp', $mode, false);
         parent::__construct($stream);
 
         $this->write($data);

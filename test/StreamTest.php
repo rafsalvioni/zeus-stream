@@ -2,7 +2,7 @@
 
 namespace ZeusTest\Stream;
 
-use Zeus\Stream\StreamWrapper;
+use Zeus\Stream\Stream;
 
 /**
  * Test to main features of Stream package.
@@ -17,9 +17,9 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     
     public function setUp()
     {
-        $this->stream = new \Zeus\Stream\TempFileStream();
-        $this->reader = StreamWrapper::open(__FILE__, 'r');
-        $this->writer = new \Zeus\Stream\OutputStream();
+        $this->stream = new \Zeus\Stream\TempFile();
+        $this->reader = Stream::open(__FILE__, 'r');
+        $this->writer = new \Zeus\Stream\Output();
         
         $this->stream->eol("\n");
         $this->reader->eol("\n");
@@ -29,18 +29,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function factoryTest()
-    {
-        $this->assertTrue(
-            (StreamWrapper::factory(\STDIN) instanceof \Zeus\Stream\Read\ReadableStream) &&
-            (StreamWrapper::factory(\fopen('php://output', 'w')) instanceof \Zeus\Stream\Write\WritableStream)
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function blocking()
+    public function blockingTest()
     {
         $block   = $this->stream->isBlocked();
         $this->stream->toggleBlocking();
@@ -51,7 +40,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function checks()
+    public function checksTest()
     {
         $this->assertTrue(
            !$this->stream->isPersistent() &&
@@ -67,7 +56,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function read()
+    public function readTest()
     {
         $this->assertEquals($this->reader->read(3), "<?p");
     }
@@ -75,7 +64,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function readLine()
+    public function readLineTest()
     {
         $this->assertEquals($this->reader->readLine(), "<?php\n");
     }
@@ -83,38 +72,26 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function iterator()
+    public function iteratorTest()
     {
-        $string = '';
-        $this->reader->seekBegin();
-        foreach ($this->reader as $line) {
-            $string .= $line;
+        $string = "First\nSecond\nThird line\nFourth";
+        $stream = \fopen('php://memory', 'r+');
+        $stream = new Stream($stream);
+        $stream->write($string);
+        $stream->eol("\n");
+        $newstring = '';
+        
+        foreach ($stream as $line) {
+            $newstring .= $line;
         }
-        $this->assertTrue(\trim($string) == \trim(\file_get_contents(__FILE__)));
-    }
-    
-    /**
-     * @test
-     * @expectedException \Exception
-     */
-    public function readableException()
-    {
-        new \Zeus\Stream\Read\ReadableStream(\STDOUT);
-    }
-    
-    /**
-     * @test
-     * @expectedException \Zeus\Stream\Write\Exception
-     */
-    public function writeException()
-    {
-        $this->reader->write("\n");
+        
+        $this->assertTrue(\trim($string) == \trim($newstring));
     }
     
     /**
      * @test
      */
-    public function writeFrom()
+    public function writeFromTest()
     {
         $bytes = $this->writer->writeFrom($this->reader);
         $this->assertEquals($bytes, \filesize(__FILE__));
@@ -123,7 +100,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function writeFromMaxLen()
+    public function writeFromMaxLenTest()
     {
         $bytes = $this->writer->writeFrom($this->reader, 10);
         $this->assertEquals($bytes, 10);
@@ -132,11 +109,11 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function writeLine()
+    public function writeLineTest()
     {
         $line = __CLASS__;
         $this->stream->writeLine($line);
-        $this->stream->seekBegin();
+        $this->stream->rewind();
         $len  = \strlen(__CLASS__) + 1;
         $this->assertEquals($line . "\n", $this->stream->read($len));
     }
@@ -144,7 +121,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function getLength()
+    public function getSizeTest()
     {
         $str = __CLASS__;
         $len = \strlen($str);

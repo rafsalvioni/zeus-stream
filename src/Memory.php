@@ -2,8 +2,6 @@
 
 namespace Zeus\Stream;
 
-use Zeus\Stream\Seek\SeekableStream;
-
 /**
  * Implements a stream of data in memory.
  * 
@@ -11,7 +9,7 @@ use Zeus\Stream\Seek\SeekableStream;
  * 
  * @author Rafael M. Salvioni
  */
-class MemoryStream extends SeekableStream
+class Memory extends Stream
 {
     /**
      *
@@ -31,7 +29,7 @@ class MemoryStream extends SeekableStream
             $file .= 'memory';
         }
 
-        $stream = StreamWrapper::open($file, $mode, false);
+        $stream = Stream::open($file, $mode, false);
         parent::__construct($stream);
 
         $this->write($data);
