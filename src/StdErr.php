@@ -28,6 +28,10 @@ class StdErr extends Stream
      */
     public function __construct()
     {
-        parent::__construct(\STDERR);
+        $stream = \defined('\\STDERR') ?
+                  \STDERR :
+                  Stream::open('php://stderr', 'w', false);
+        
+        parent::__construct($stream);
     }
 }

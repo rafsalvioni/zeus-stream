@@ -28,6 +28,10 @@ class StdOut extends Stream
      */
     public function __construct()
     {
-        parent::__construct(\STDOUT);
+        $stream = \defined('\\STDOUT') ?
+                  \STDOUT :
+                  Stream::open('php://stdout', 'w', false);
+        
+        parent::__construct($stream);
     }
 }
