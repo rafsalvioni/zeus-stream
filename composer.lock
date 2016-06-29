@@ -99,16 +99,16 @@
         },
         {
             "name": "rafsalvioni/zeus-core",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rafsalvioni/zeus-core.git",
-                "reference": "fbe48d5c97c4ffe7fab97063fe8a5a03688c7684"
+                "reference": "026cf9739a5e14c08e6d5e90bfd5415795d67261"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rafsalvioni/zeus-core/zipball/fbe48d5c97c4ffe7fab97063fe8a5a03688c7684",
-                "reference": "fbe48d5c97c4ffe7fab97063fe8a5a03688c7684",
+                "url": "https://api.github.com/repos/rafsalvioni/zeus-core/zipball/026cf9739a5e14c08e6d5e90bfd5415795d67261",
+                "reference": "026cf9739a5e14c08e6d5e90bfd5415795d67261",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
                 "bitmask",
                 "zeus"
             ],
-            "time": "2016-06-28 14:48:31"
+            "time": "2016-06-29 15:02:18"
         },
         {
             "name": "rafsalvioni/zeus-event",

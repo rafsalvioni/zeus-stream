@@ -454,18 +454,20 @@ class Stream implements StreamInterface
     public function writeFrom(PsrStreamInterface $stream, $maxLen = -1)
     {
         $bytes = 0;
-        if ($maxLen < 0) {
-            while (!$stream->eof()) {
-                $data = $stream->read(1024);
-                $bytes += $this->write($data);
+        if ($this->isWritable() && $stream->isReadable()) {
+            if ($maxLen < 0) {
+                while (!$stream->eof()) {
+                    $data = $stream->read(1024);
+                    $bytes += $this->write($data);
+                }
             }
-        }
-        else if ($maxLen > 0) {
-            while (!$stream->eof() && $maxLen > 0) {
-                $data    = $stream->read($maxLen >= 1024 ? 1024 : $maxLen);
-                $length  = \strlen($data);
-                $maxLen -= $length;
-                $bytes  += $this->write($data);
+            else if ($maxLen > 0) {
+                while (!$stream->eof() && $maxLen > 0) {
+                    $data    = $stream->read($maxLen >= 1024 ? 1024 : $maxLen);
+                    $length  = \strlen($data);
+                    $maxLen -= $length;
+                    $bytes  += $this->write($data);
+                }
             }
         }
         return $bytes;
