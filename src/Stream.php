@@ -5,7 +5,6 @@ namespace Zeus\Stream;
 use Zeus\Event\EmitterTrait;
 use Zeus\Core\BitMask;
 use Zeus\Core\ErrorHandler;
-use Psr\Http\Message\StreamInterface as PsrStreamInterface;
 
 /**
  * Implements a generic stream manager.
@@ -369,7 +368,7 @@ class Stream implements StreamInterface
      * @return self
      * @throws \RuntimeException
      */
-    public function seek($offset, $whence = SEEK_SET)
+    public function seek($offset, $whence = \SEEK_SET)
     {
         $this->checkStream();
         if (\fseek($this->stream, $offset, $whence) == -1) {
@@ -447,25 +446,27 @@ class Stream implements StreamInterface
 
     /**
      * 
-     * @param PsrStreamInterface $stream
+     * @param StreamInterface $stream
      * @param int $maxLen
      * @return int
      */
-    public function writeFrom(PsrStreamInterface $stream, $maxLen = -1)
+    public function writeFrom(StreamInterface $stream, $maxLen = -1)
     {
         $bytes = 0;
-        if ($maxLen < 0) {
-            while (!$stream->eof()) {
-                $data = $stream->read(1024);
-                $bytes += $this->write($data);
+        if ($stream->isReadable() && $this->isWritable()) {
+            if ($maxLen < 0) {
+                while (!$stream->eof()) {
+                    $data = $stream->read(1024);
+                    $bytes += $this->write($data);
+                }
             }
-        }
-        else if ($maxLen > 0) {
-            while (!$stream->eof() && $maxLen > 0) {
-                $data    = $stream->read($maxLen >= 1024 ? 1024 : $maxLen);
-                $length  = \strlen($data);
-                $maxLen -= $length;
-                $bytes  += $this->write($data);
+            else if ($maxLen > 0) {
+                while (!$stream->eof() && $maxLen > 0) {
+                    $data    = $stream->read($maxLen >= 1024 ? 1024 : $maxLen);
+                    $length  = \strlen($data);
+                    $maxLen -= $length;
+                    $bytes  += $this->write($data);
+                }
             }
         }
         return $bytes;
