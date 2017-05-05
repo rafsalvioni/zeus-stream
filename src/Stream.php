@@ -399,7 +399,7 @@ class Stream implements StreamInterface
             return $this;
         }
         catch (\Throwable $ex) {
-            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+            throw new \RuntimeException('Unable to seek the stream!', $ex->getCode(), $ex);
         }
     }
 
@@ -417,7 +417,7 @@ class Stream implements StreamInterface
             return $this;
         }
         catch (\Throwable $ex) {
-            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+            throw new \RuntimeException('Unable to (un)block the stream!', $ex->getCode(), $ex);
         }
     }
 
@@ -452,7 +452,7 @@ class Stream implements StreamInterface
             return \ftruncate($this->stream, $size);
         }
         catch (\Throwable $ex) {
-            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+            throw new \RuntimeException('Unable to truncate the stream!', $ex->getCode(), $ex);
         }
     }
 
