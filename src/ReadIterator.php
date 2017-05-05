@@ -7,7 +7,7 @@ namespace Zeus\Stream;
  *
  * @author Rafael M. Salvioni
  */
-class StreamIterator implements \Iterator
+class ReadIterator implements \Iterator
 {
     /**
      * Stream

@@ -14,11 +14,13 @@ class TempFile extends Stream
      * @param string $data Initial data
      * @param string $mode Open mode
      */
-    public function __construct($data = null, $mode = 'r+')
+    public function __construct(string $data = null, string $mode = 'r+')
     {
         $stream = Stream::open('php://temp', $mode, false);
         parent::__construct($stream);
 
-        $this->write($data);
+        if ($data) {
+            $this->write($data);
+        }
     }
 }

@@ -15,7 +15,7 @@ class Input extends Stream
      * 
      * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         static $instance = null;
         if (!$instance) {

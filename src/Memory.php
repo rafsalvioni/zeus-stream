@@ -17,11 +17,10 @@ class Memory extends Stream
      * @param int $memSize Memory limit
      * @param string $mode Open mode
      */
-    public function __construct($data = null, $memSize = null, $mode = 'w+')
-    {
-        $memSize = \intval($memSize);
-        $file    = 'php://';
-
+    public function __construct(
+        string $data = null, int $memSize = null, string $mode = 'w+'
+    ){
+        $file = 'php://';
         if ($memSize > 0) {
             $file .= "temp/maxmemory:$memSize";
         }
@@ -32,6 +31,8 @@ class Memory extends Stream
         $stream = Stream::open($file, $mode, false);
         parent::__construct($stream);
 
-        $this->write($data);
+        if ($data) {
+            $this->write($data);
+        }
     }
 }

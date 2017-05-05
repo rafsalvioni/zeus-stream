@@ -14,7 +14,7 @@ class StdOut extends Stream
      * 
      * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         static $instance = null;
         if (!$instance) {
@@ -28,10 +28,7 @@ class StdOut extends Stream
      */
     public function __construct()
     {
-        $stream = \defined('\\STDOUT') ?
-                  \STDOUT :
-                  Stream::open('php://stdout', 'w', false);
-        
+        $stream = Stream::open('php://stdout', 'w', false);
         parent::__construct($stream);
     }
 }

@@ -14,7 +14,7 @@ class StdErr extends Stream
      * 
      * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         static $instance = null;
         if (!$instance) {
@@ -28,10 +28,7 @@ class StdErr extends Stream
      */
     public function __construct()
     {
-        $stream = \defined('\\STDERR') ?
-                  \STDERR :
-                  Stream::open('php://stderr', 'w', false);
-        
+        $stream = Stream::open('php://stderr', 'w', false);
         parent::__construct($stream);
     }
 }

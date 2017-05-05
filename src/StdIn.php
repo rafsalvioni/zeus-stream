@@ -14,7 +14,7 @@ class StdIn extends Stream
      * 
      * @return self
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         static $instance = null;
         if (!$instance) {
@@ -28,10 +28,7 @@ class StdIn extends Stream
      */
     public function __construct()
     {
-        $stream = \defined('\\STDIN') ?
-                  \STDIN :
-                  Stream::open('php://stdin', 'r', false);
-        
+        $stream = Stream::open('php://stdin', 'r', false);
         parent::__construct($stream);
     }
 }

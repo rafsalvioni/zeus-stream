@@ -4,7 +4,6 @@ namespace Zeus\Stream;
 
 use Zeus\Event\EmitterTrait;
 use Zeus\Core\BitMask;
-use Zeus\Core\ErrorHandler;
 use Psr\Http\Message\StreamInterface as PsrStreamInterface;
 
 /**
@@ -73,22 +72,21 @@ class Stream implements StreamInterface
      * @param string $path
      * @param string $mode
      * @param bool $returnSelf Should be return a self-instance?
-     * @return self
+     * @return mixed
      * @throws \RuntimeException
      */
-    public static function open($path, $mode, $returnSelf = true)
-    {
+    public static function open(
+        string $path, string $mode, bool $returnSelf = true
+    ){
         if (\substr($mode, -1) != 'b') {
             $mode .= 'b';
         }
         
         try {
-            ErrorHandler::start();
             $stream = \fopen($path, $mode);
-            ErrorHandler::stop();
         }
-        catch (\Exception $ex) {
-            throw new \RuntimeException('Unable to open stream!');
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to open stream!', $ex->getCode(), $ex);
         }
         
         if ($returnSelf) {
@@ -97,6 +95,22 @@ class Stream implements StreamInterface
         return $stream;
     }
     
+    /**
+     * Converts a Psr\Http\Message\StreamInterface object to a
+     * Zeus\Stream\StreamInterface object.
+     * 
+     * @param PsrStreamInterface $psrStream
+     * @return StreamInterface
+     */
+    public static function fromPsr(PsrStreamInterface $psrStream): StreamInterface
+    {
+        if (!($psrStream instanceof StreamInterface)) {
+            $stream = $psrStream->detach();
+            return new self($stream);
+        }
+        return $psrStream;
+    }
+
     /**
      *
      * @param resource $stream Stream
@@ -118,7 +132,7 @@ class Stream implements StreamInterface
             $this->flags = new BitMask();
             
             if ($match[2] == '+') {
-                $this->flags->add(self::READABLE)->add(self::WRITABLE);
+                $this->flags->add(self::READABLE, self::WRITABLE);
             }
             else if ($match[1] == 'r') {
                 $this->flags->add(self::READABLE);
@@ -174,7 +188,7 @@ class Stream implements StreamInterface
                 $this->setBlocking($block);
             }
         }
-        catch (\Exception $ex) {
+        catch (\Throwable $ex) {
             $contents = '';
         }
         return $contents;
@@ -182,7 +196,6 @@ class Stream implements StreamInterface
 
     /**
      * 
-     * @return self
      */
     public function close()
     {
@@ -190,7 +203,6 @@ class Stream implements StreamInterface
             \fclose($this->stream);
         }
         $this->detach();
-        return $this;
     }
 
     /**
@@ -221,7 +233,7 @@ class Stream implements StreamInterface
      * @param string $eol
      * @return string
      */
-    public function eol($eol = null)
+    public function eol(string $eol = null): string
     {
         if (!\is_null($eol)) {
             $this->eol = (string)$eol;
@@ -232,17 +244,17 @@ class Stream implements StreamInterface
     /**
      * 
      * @return string
-     * @throws \ErrorException
-     * @throws \RuntimeException
      */
     public function getContents()
     {
-        $this->checkStream();
-        ErrorHandler::start();
-        $contents = \stream_get_contents($this->stream);
-        $this->emit('read', $contents);
-        ErrorHandler::stop();
-        return $contents;
+        try {
+            $contents = \stream_get_contents($this->stream);
+            $this->emit('read', $contents);
+            return $contents;
+        }
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
@@ -259,7 +271,7 @@ class Stream implements StreamInterface
                 return $meta;
             }
             else {
-                return \array_get($meta, $key, $default);
+                return $meta[$key] ?? $default;
             }
         }
         return $default;
@@ -282,7 +294,7 @@ class Stream implements StreamInterface
      * 
      * @return bool
      */
-    public function isBlocked()
+    public function isBlocked(): bool
     {
         return $this->getMetaData('blocked', false);
     }
@@ -291,7 +303,7 @@ class Stream implements StreamInterface
      * 
      * @return bool
      */
-    public function isPersistent()
+    public function isPersistent(): bool
     {
         return $this->flags->has(self::PERSISTENT);
     }
@@ -330,10 +342,14 @@ class Stream implements StreamInterface
      */
     public function read($length = 1024)
     {
-        $this->checkStream();
-        $string = \fread($this->stream, $length);
-        $this->emit('read', $string);
-        return $string;
+        try {
+            $string = \fread($this->stream, $length);
+            $this->emit('read', $string);
+            return $string;
+        }
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
@@ -341,16 +357,20 @@ class Stream implements StreamInterface
      * @param string $eol
      * @return string
      */
-    public function readLine($eol = null)
+    public function readLine(string $eol = null): string
     {
-        $this->checkStream();
-        $eol  = \coalesce($eol, $this->eol);
-        $line = \stream_get_line($this->stream, 0, $eol);
-        if ($line) {
-            $line .= $eol;
+        try {
+            $eol  = $eol ?? $this->eol;
+            $line = \stream_get_line($this->stream, 0, $eol);
+            if ($line) {
+                $line .= $eol;
+            }
+            $this->emit('read', $line);
+            return $line;
         }
-        $this->emit('read', $line);
-        return $line;
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
@@ -369,31 +389,36 @@ class Stream implements StreamInterface
      * @return self
      * @throws \RuntimeException
      */
-    public function seek($offset, $whence = SEEK_SET)
+    public function seek($offset, $whence = \SEEK_SET)
     {
-        $this->checkStream();
-        if (\fseek($this->stream, $offset, $whence) == -1) {
-            throw new \RuntimeException('Stream isn\'t seekable!');
+        try {
+            if (\fseek($this->stream, $offset, $whence) < 0) {
+                throw new \RuntimeException('Stream isn\'t seekable!');
+            }
+            $this->emit('seek', $offset, $whence);
+            return $this;
         }
-        $this->emit('seek', $offset, $whence);
-        return $this;
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
      * 
      * @param bool $bool
-     * @return self
-     * @throws \ErrorException
+     * @return StreamInterface
      * @throws \RuntimeException
      */
-    public function setBlocking($bool)
+    public function setBlocking(bool $bool): StreamInterface
     {
-        $this->checkStream();
-        ErrorHandler::start();
-        \stream_set_blocking($this->stream, (bool)$bool);
-        $this->emit('block', (bool)$bool);
-        ErrorHandler::stop();
-        return $this;
+        try {
+            \stream_set_blocking($this->stream, $bool);
+            $this->emit('block', $bool);
+            return $this;
+        }
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
@@ -402,15 +427,14 @@ class Stream implements StreamInterface
      */
     public function tell()
     {
-        $this->checkStream();
         return \ftell($this->stream);
     }
 
     /**
      * 
-     * @return self
+     * @return StreamInterface
      */
-    public function toggleBlocking()
+    public function toggleBlocking(): StreamInterface
     {
         $block = !$this->isBlocked();
         return $this->setBlocking($block);
@@ -419,17 +443,17 @@ class Stream implements StreamInterface
     /**
      * 
      * @param int $size
-     * @return self
-     * @throws \ErrorException
+     * @return bool
      * @throws \RuntimeException
      */
-    public function truncate($size = 0)
+    public function truncate(int $size = 0): bool
     {
-        $this->checkStream();
-        ErrorHandler::start();
-        \ftruncate($this->stream, $size);
-        ErrorHandler::stop();
-        return $this;
+        try {
+            return \ftruncate($this->stream, $size);
+        }
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to read the stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
@@ -439,49 +463,49 @@ class Stream implements StreamInterface
      */
     public function write($string)
     {
-        $this->checkStream();
-        $bytes = \fwrite($this->stream, $string);
-        $this->emit('write', $string);
-        return $bytes;
+        try {
+            $bytes = \fwrite($this->stream, $string);
+            $this->emit('write', $string);
+            return $bytes;
+        }
+        catch (\Throwable $ex) {
+            throw new \RuntimeException('Unable to write in stream!', $ex->getCode(), $ex);
+        }
     }
 
     /**
      * 
-     * @param PsrStreamInterface $stream
+     * @param PsrStreamInterface $from
      * @param int $maxLen
      * @return int
      */
-    public function writeFrom(PsrStreamInterface $stream, $maxLen = -1)
+    public function writeFrom(PsrStreamInterface $from, int $maxLen = -1): int
     {
         $bytes = 0;
-        if ($this->isWritable() && $stream->isReadable()) {
-            if ($maxLen < 0) {
-                while (!$stream->eof()) {
-                    $data = $stream->read(1024);
-                    $bytes += $this->write($data);
-                }
+        if ($this->isWritable() && $from->isReadable()) {
+            while ($maxLen < 0 && !$from->eof()) {
+                $data   = $from->read(1024);
+                $bytes += $this->write($data);
             }
-            else if ($maxLen > 0) {
-                while (!$stream->eof() && $maxLen > 0) {
-                    $data    = $stream->read($maxLen >= 1024 ? 1024 : $maxLen);
-                    $length  = \strlen($data);
-                    $maxLen -= $length;
-                    $bytes  += $this->write($data);
-                }
+            while ($maxLen > 0 && !$from->eof()) {
+                $data    = $from->read($maxLen >= 1024 ? 1024 : $maxLen);
+                $length  = \strlen($data);
+                $maxLen -= $length;
+                $bytes  += $this->write($data);
             }
         }
         return $bytes;
     }
-
+    
     /**
      * 
      * @param string $line
      * @param string $eol
      * @return int
      */
-    public function writeLine($line, $eol = null)
+    public function writeLine(string $line, string $eol = null): int
     {
-        $eol = \coalesce($eol, $this->eol);
+        $eol = $eol ?? $this->eol;
         $n   = \strlen($eol);
         if (\substr($line, -$n) != $eol) {
             $line .= $eol;
@@ -491,23 +515,21 @@ class Stream implements StreamInterface
 
     /**
      * 
-     * @return StreamIterator
+     * @return ReadIterator
      */
-    public function getIterator()
+    public function getIterator(): ReadIterator
     {
-        $this->checkStream();
-        return new StreamIterator($this);
+        return new ReadIterator($this);
     }
-
+    
     /**
-     * Checks if the stream resource is valid and, if not, throws a exception.
+     * Closes the stream
      * 
-     * @throws \RuntimeException
      */
-    private function checkStream()
+    public function __destruct()
     {
-        if (!\is_resource($this->stream)) {
-            throw new \RuntimeException('Stream is closed or detached!');
+        if (!$this->isPersistent()) {
+            $this->close();
         }
     }
 }

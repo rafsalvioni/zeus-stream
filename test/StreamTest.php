@@ -45,6 +45,8 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(
            !$this->stream->isPersistent() &&
            $this->stream->isSeekable() &&
+           $this->stream->isReadable() &&
+           $this->stream->isWritable() &&
            $this->reader->isReadable() &&
            !$this->reader->isWritable() &&
            $this->writer->isWritable() &&
@@ -127,5 +129,25 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $len = \strlen($str);
         $this->stream->write($str);
         $this->assertEquals($len, $this->stream->getSize());
+    }
+    
+    /**
+     * @test
+     */
+    public function detachTest()
+    {
+        $stream = $this->stream->detach();
+        $this->assertTrue(\is_resource($stream));
+        
+        try {
+            $bytes = $this->stream->write('abcd');
+            $this->assertEquals($bytes, 4);
+        }
+        catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
+        
+        unset($this->stream);
+        $this->assertTrue(\is_resource($stream));
     }
 }

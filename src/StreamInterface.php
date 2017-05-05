@@ -2,7 +2,7 @@
 
 namespace Zeus\Stream;
 
-use \Zeus\Event\EmitterInterface;
+use Zeus\Event\EmitterInterface;
 use Psr\Http\Message\StreamInterface as PsrStreamInterface;
 
 /**
@@ -22,14 +22,14 @@ interface StreamInterface extends
      * @return StreamInterface
      * @throws \RuntimeException
      */
-    public function setBlocking($bool);
+    public function setBlocking(bool $bool): StreamInterface;
 
     /**
      * Toggle into blocking mode. If turned on, will turn off and vice-versa.
      *
      * @return StreamInterface
      */
-    public function toggleBlocking();
+    public function toggleBlocking(): StreamInterface;
     
     /**
      * Sets / returns a default string used by end of line.
@@ -37,7 +37,7 @@ interface StreamInterface extends
      * @param string $eol End of line string
      * @return string
      */
-    public function eol($eol = null);
+    public function eol(string $eol = null): string;
 
     /**
      * Returns a line of data.
@@ -49,7 +49,7 @@ interface StreamInterface extends
      * @return string
      * @throws \RuntimeException
      */
-    public function readLine($eol = null);
+    public function readLine(string $eol = null): string;
     
     /**
      * Write a line data.
@@ -63,18 +63,18 @@ interface StreamInterface extends
      * @param string $eol End of line string
      * @return int
      */
-    public function writeLine($line, $eol = null);
+    public function writeLine(string $line, string $eol = null): int;
 
     /**
-     * Copy data between streams.
+     * Copy data from another stream.
      *
      * Returns the quantity of bytes written.
      *
-     * @param PsrStreamInterface $stream Stream
+     * @param PsrStreamInterface $from Stream
      * @param int $maxLen Max bytes to be written
      * @return int
      */
-    public function writeFrom(PsrStreamInterface $stream, $maxLen = -1);
+    public function writeFrom(PsrStreamInterface $from, int $maxLen = -1): int;
     
     /**
      * Truncate the stream to $size bytes.
@@ -83,21 +83,21 @@ interface StreamInterface extends
      * @param int $size bytes
      * @return bool
      */
-    public function truncate($size = 0);
+    public function truncate(int $size = 0): bool;
     
     /**
      * Shows if stream is in blocking mode.
      *
      * @return bool
      */
-    public function isBlocked();
+    public function isBlocked(): bool;
     
     /**
      * Shows if the stream is persistent.
      *
      * @return bool
      */
-    public function isPersistent();
+    public function isPersistent(): bool;
     
     /**
      * Get stream metadata
