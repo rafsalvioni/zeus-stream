@@ -19,6 +19,8 @@ class TempFile extends Stream
         $stream = Stream::open('php://temp', $mode, false);
         parent::__construct($stream);
 
-        $this->write($data);
+        if ($data) {
+            $this->write($data);
+        }
     }
 }

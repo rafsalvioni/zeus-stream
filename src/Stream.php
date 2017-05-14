@@ -44,6 +44,18 @@ class Stream implements StreamInterface
      * @var int
      */
     const PERSISTENT = 8;
+    /**
+     * Local stream flag
+     * 
+     * @var int
+     */
+    const ISLOCAL    = 16;
+    /**
+     * Default bytes length
+     * 
+     * @var int
+     */
+    const DEFAULT_BYTES = 8192;
 
     /**
      * Stream flags
@@ -114,7 +126,9 @@ class Stream implements StreamInterface
             $metadata     = $this->getMetaData();
             \preg_match('/^([rwax])(\+?)/', $metadata['mode'], $match);
 
-            $this->flags = new BitMask();
+            $this->flags = new BitMask(
+                \stream_is_local($this->stream) ? self::ISLOCAL : 0
+            );
             
             if ($match[2] == '+') {
                 $this->flags->add(self::READABLE)->add(self::WRITABLE);
@@ -273,6 +287,10 @@ class Stream implements StreamInterface
      */
     public function getSize()
     {
+        if (!$this->isSeekable()) {
+            return -1;
+        }
+        
         $pos  = $this->tell();
         $this->seek(0, \SEEK_END);
         $size = $this->tell();
@@ -329,6 +347,15 @@ class Stream implements StreamInterface
      * 
      * @return bool
      */
+    public function isLocal()
+    {
+        return $this->flags->has(self::ISLOCAL);
+    }
+    
+    /**
+     * 
+     * @return bool
+     */
     public function isDetached()
     {
         return !$this->stream;
@@ -339,7 +366,7 @@ class Stream implements StreamInterface
      * @param int $length
      * @return string
      */
-    public function read($length = 1024)
+    public function read($length = self::DEFAULT_BYTES)
     {
         try {
             ErrorHandler::start();
@@ -507,18 +534,30 @@ class Stream implements StreamInterface
      */
     public function writeFrom(PsrStreamInterface $stream, $maxLen = -1)
     {
+        if (!$this->isWritable() || !$stream->isReadable()) {
+            return 0;
+        }
+        
         $bytes = 0;
-        if ($this->isWritable() && $stream->isReadable()) {
+        try {
+            ErrorHandler::start();
             while ($maxLen < 0 && !$stream->eof()) {
-                $data = $stream->read(1024);
-                $bytes += $this->write($data);
+                $data = \fread($stream->stream, self::DEFAULT_BYTES);
+                $bytes += \fwrite($this->stream, $data);
             }
             while ($maxLen > 0 && !$stream->eof()) {
-                $data    = $stream->read($maxLen >= 1024 ? 1024 : $maxLen);
+                $toRead  = $maxLen >= self::DEFAULT_BYTES ?
+                            self::DEFAULT_BYTES :
+                            $maxLen;
+                $data    = \fread($stream->stream, $toRead);
                 $length  = \strlen($data);
                 $maxLen -= $length;
-                $bytes  += $this->write($data);
+                $bytes  += \fwrite($this->stream, $data);
             }
+            ErrorHandler::stop();
+        } 
+        catch (\ErrorException $ex) {
+            throw new \RuntimeException('Unable to copy streams!', 0, $ex);
         }
         return $bytes;
     }

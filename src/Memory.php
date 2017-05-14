@@ -32,6 +32,8 @@ class Memory extends Stream
         $stream = Stream::open($file, $mode, false);
         parent::__construct($stream);
 
-        $this->write($data);
+        if ($data) {
+            $this->write($data);
+        }
     }
 }

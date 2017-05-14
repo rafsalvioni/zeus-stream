@@ -28,6 +28,7 @@ interface StreamInterface extends
      * Toggle into blocking mode. If turned on, will turn off and vice-versa.
      *
      * @return StreamInterface
+     * @throws \RuntimeException
      */
     public function toggleBlocking();
     
@@ -62,6 +63,7 @@ interface StreamInterface extends
      * @param string $line Line
      * @param string $eol End of line string
      * @return int
+     * @throws \RuntimeException
      */
     public function writeLine($line, $eol = null);
 
@@ -73,6 +75,7 @@ interface StreamInterface extends
      * @param PsrStreamInterface $stream Stream
      * @param int $maxLen Max bytes to be written
      * @return int
+     * @throws \RuntimeException
      */
     public function writeFrom(PsrStreamInterface $stream, $maxLen = -1);
     
@@ -82,6 +85,7 @@ interface StreamInterface extends
      * @see \ftruncate()
      * @param int $size bytes
      * @return bool
+     * @throws \RuntimeException
      */
     public function truncate($size = 0);
     
@@ -98,6 +102,13 @@ interface StreamInterface extends
      * @return bool
      */
     public function isPersistent();
+    
+    /**
+     * Checks if the stream is a local stream or not.
+     *
+     * @return bool
+     */
+    public function isLocal();
     
     /**
      * Checks if the stream is detached.

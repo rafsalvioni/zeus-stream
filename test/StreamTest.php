@@ -62,7 +62,8 @@ class StreamTest extends \PHPUnit_Framework_TestCase
            !$this->reader->isWritable() &&
            $this->writer->isWritable() &&
            !$this->writer->isReadable() &&
-           !$this->writer->isSeekable()
+           !$this->writer->isSeekable() &&
+           $this->reader->isLocal()
         );
     }
 
@@ -108,6 +109,9 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     {
         $bytes = $this->writer->writeFrom($this->reader);
         $this->assertEquals($bytes, \filesize(__FILE__));
+        
+        $bytes = $this->reader->writeFrom($this->writer);
+        $this->assertEquals($bytes, 0);
     }
     
     /**
@@ -117,6 +121,9 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     {
         $bytes = $this->writer->writeFrom($this->reader, 10);
         $this->assertEquals($bytes, 10);
+        
+        $bytes = $this->reader->writeFrom($this->writer);
+        $this->assertEquals($bytes, 0);
     }
     
     /**
