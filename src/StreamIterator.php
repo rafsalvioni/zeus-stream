@@ -25,11 +25,17 @@ class StreamIterator implements \Iterator
     /**
      * 
      * @param StreamInterface $stream
+     * @throws \RuntimeException
      */
     public function __construct(StreamInterface $stream)
     {
-        $this->stream      = $stream;
-        $this->currentLine = -1;
+        if ($stream->isReadable()) {
+            $this->stream      = $stream;
+            $this->currentLine = -1;
+        }
+        else {
+            throw new \RuntimeException('Stream can\'t be read!');
+        }
     }
 
     /**

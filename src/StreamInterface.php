@@ -86,18 +86,25 @@ interface StreamInterface extends
     public function truncate($size = 0);
     
     /**
-     * Shows if stream is in blocking mode.
+     * Checks if stream is in blocking mode.
      *
      * @return bool
      */
     public function isBlocked();
     
     /**
-     * Shows if the stream is persistent.
+     * Checks if the stream is persistent.
      *
      * @return bool
      */
     public function isPersistent();
+    
+    /**
+     * Checks if the stream is detached.
+     *
+     * @return bool
+     */
+    public function isDetached();
     
     /**
      * Get stream metadata

@@ -29,6 +29,19 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function openTest()
+    {
+        try {
+            Stream::open('php://abcd', 'r');
+            $this->assertTrue(false);
+        } catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
+    }
+
+    /**
+     * @test
+     */
     public function blockingTest()
     {
         $block   = $this->stream->isBlocked();
@@ -127,5 +140,29 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $len = \strlen($str);
         $this->stream->write($str);
         $this->assertEquals($len, $this->stream->getSize());
+    }
+    
+    /**
+     * @test
+     */
+    public function detachTest()
+    {
+        $this->assertFalse($this->reader->isDetached());
+        $this->reader->detach();
+        $this->assertTrue($this->reader->isDetached());
+
+        try {
+            $this->reader->read();
+            $this->assertTrue(false);
+        } catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
+        
+        try {
+            $this->reader->getIterator();
+            $this->assertTrue(false);
+        } catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
     }
 }
