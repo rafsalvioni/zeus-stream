@@ -14,12 +14,14 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     private $stream;
     private $reader;
     private $writer;
+    private $closed;
     
     public function setUp()
     {
         $this->stream = new \Zeus\Stream\TempFile();
         $this->reader = Stream::open(__FILE__, 'r');
         $this->writer = new \Zeus\Stream\Output();
+        $this->closed = (new \Zeus\Stream\Memory())->close();
         
         $this->stream->eol("\n");
         $this->reader->eol("\n");
@@ -47,7 +49,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $block   = $this->stream->isBlocked();
         $this->stream->toggleBlocking();
         $inverse = $this->stream->isBlocked();
-        $this->assertFalse($block && $inverse);
+        $this->assertFalse($block && $inverse && !$this->closed->isBlocked());
     }
     
     /**
@@ -63,7 +65,12 @@ class StreamTest extends \PHPUnit_Framework_TestCase
            $this->writer->isWritable() &&
            !$this->writer->isReadable() &&
            !$this->writer->isSeekable() &&
-           $this->reader->isLocal()
+           $this->reader->isLocal() &&
+           !$this->closed->isBlocked() &&
+           !$this->closed->isPersistent() &&
+           !$this->closed->isReadable() &&
+           !$this->closed->isWritable() &&
+           !$this->closed->isSeekable()
         );
     }
 
@@ -73,6 +80,12 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function readTest()
     {
         $this->assertEquals($this->reader->read(3), "<?p");
+        try {
+            $this->writer->read();
+            $this->assertTrue(false);
+        } catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
     }
     
     /**
@@ -81,6 +94,12 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function readLineTest()
     {
         $this->assertEquals($this->reader->readLine(), "<?php\n");
+        try {
+            $this->writer->readLine();
+            $this->assertTrue(false);
+        } catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
     }
     
     /**
@@ -136,6 +155,13 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $this->stream->rewind();
         $len  = \strlen(__CLASS__) + 1;
         $this->assertEquals($line . "\n", $this->stream->read($len));
+        
+        try {
+            $this->reader->writeLine(__CLASS__);
+            $this->assertTrue(false);
+        } catch (\RuntimeException $ex) {
+            $this->assertTrue(true);
+        }
     }
     
     /**
@@ -147,6 +173,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $len = \strlen($str);
         $this->stream->write($str);
         $this->assertEquals($len, $this->stream->getSize());
+        $this->assertTrue($this->writer->getSize() === null);
     }
     
     /**

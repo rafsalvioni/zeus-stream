@@ -3,11 +3,11 @@
 namespace Zeus\Stream;
 
 /**
- * Iterator for readable streams.
+ * Iterate a stream in lines.
  *
  * @author Rafael M. Salvioni
  */
-class StreamIterator implements \Iterator
+class LineIterator implements \Iterator
 {
     /**
      * Stream

@@ -16,6 +16,13 @@ interface StreamInterface extends
     \IteratorAggregate
 {
     /**
+     * Default length of bytes to read (8KB)
+     * 
+     * @var int
+     */
+    const DEFAULT_READ = 8196;
+    
+    /**
      * Setting if a stream should be in blocking mode or not.
      * 
      * @param bool $bool On/off
@@ -125,11 +132,4 @@ interface StreamInterface extends
      * @return mixed
      */
     public function getMetaData($key = null, $default = null);
-
-    /**
-     * Disable a stream serialization.
-     *
-     * @throws \LogicException
-     */
-    public function __sleep();
 }
