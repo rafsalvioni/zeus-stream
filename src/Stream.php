@@ -62,7 +62,7 @@ class Stream implements StreamInterface
         
         $resType = \get_resource_type($stream);
 
-        if (\preg_match('/stream/i', $resType)) {
+        if (\stripos($resType, 'stream') !== false) {
             $this->stream = $stream;
             $metadata     = $this->getMetaData();
             \preg_match('/^([rwax])(\+?)/', $metadata['mode'], $match);
